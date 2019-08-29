@@ -1,114 +1,105 @@
-var Listado = function(restaurantes) {
-    this.restaurantes = restaurantes;
-}
+class Listado {
 
-Listado.prototype.reservarUnHorario = function(id, horario) {
-    //Busca el objeto que posee el id dado
-    var restaurant = this.buscarRestaurante(id);
-    //Le envía el mensaje al objeto encontrado para que reserve el horario
-    restaurant.reservarHorario(horario);
-}
+    constructor(restaurantes) {
+        this.restaurantes = restaurantes;
+    }
 
-Listado.prototype.calificarRestaurant = function(id, calificacion) {
-    //Busca el objeto que posee el id dado
-    var restaurant = this.buscarRestaurante(id);
-    //Le envía el mensaje al objeto encontrado para que agregue la nueva calificación
-    restaurant.calificar(calificacion);
-}
+    eliminarRepetidos(arreglo) {
+        let h2 = arreglo.filter(function (elem, index, self) {
+            return index === self.indexOf(elem);
+        });
+        return h2.sort();
+    }
 
-//Dado un id, busca el objeto del listado que tiene ese id
-Listado.prototype.buscarRestaurante = function(id) {
-    for (var i = 0; i < this.restaurantes.length; i++) {
-        if (this.restaurantes[i].id === id) {
-            return this.restaurantes[i]
+    reservarUnHorario(id, horario) {
+        //Busca el objeto que posee el id dado
+        let restaurant = this.buscarRestaurante(id);
+        //Le envía el mensaje al objeto encontrado para que reserve el horario
+        restaurant.reservarHorario(horario);
+    }
+
+    calificarRestaurant(id, calificacion) {
+        //Busca el objeto que posee el id dado
+        let restaurant = this.buscarRestaurante(id);
+        //Le envía el mensaje al objeto encontrado para que agregue la nueva calificación
+        restaurant.calificar(calificacion);
+    }
+
+    //Dado un id, busca el objeto del listado que tiene ese id
+    buscarRestaurante(id) {
+
+       let busqueda = this.restaurantes.find(restaurantes => restaurantes.id ===  id); 
+       return busqueda;
+    }
+
+
+    //Obtiene todas las ciudades de los restaurantes sin repetidos
+    obtenerUbicaciones() {
+        //Array donde se van a ir agregando las ciudades (van a estar repetidas)
+       
+        let restaurantes = this.restaurantes;
+        let c = restaurantes.map(restaurantes => restaurantes.ubicacion);
+        //Se crea un nuevo array donde se van a agregar las ciudades pero sin repetirse
+
+        return this.eliminarRepetidos(c);
+    }
+
+
+    //Obtiene todos los rubros de los restaurantes sin repetidos. Su funcionamiento es similar a obtC()
+    obtenerRubros() {
+        let restaurantes = this.restaurantes;
+        let r = restaurantes.map(restaurantes => restaurantes.rubro);
+        return this.eliminarRepetidos(r);
+    }
+
+    //Obtiene todos los horarios de los restaurantes (sin repetidos). Está funcionalidad es un poco más compleja ya que un restaurante
+    //tiene un array de horarios. Al buscarlos todos vamos a pasar a tener un array de arrays que luego vamos a tener que 
+    //convertir en uno solo
+    obtenerHorarios() {
+        //En este array se van a cargar los arrays de horarios, que luego vamos convertir en un solo array
+        let restaurantes = this.restaurantes;
+        let arregloH = restaurantes.map(restaurantes => restaurantes.horarios);;
+        //Recorremos el array de restaurantes y vamos agregando todos los array de horarios
+
+        //En este arreglo vamos a poner todos los horarios, uno por uno
+        let h = [];
+        arregloH.forEach(function (a) {
+            a.forEach(function (hor) {
+                h.push(hor)
+            });
+        });
+
+        //En este arreglo vamos a poner todos los horarios pero sin repetidos
+
+        return this.eliminarRepetidos(h);
+    }
+
+    //Función que recibe los filtros que llegan desde el HTML y filtra el arreglo de restaurantes.
+    //Solo se filtra si el valor recibido es distinto de null.
+    obtenerRestaurantes(filtroRubro, filtroCiudad, filtroHorario) {
+        let restaurantesFiltrados = this.restaurantes;
+        if (filtroRubro !== null) {
+            restaurantesFiltrados = restaurantesFiltrados.filter(restaurant => restaurant.rubro == filtroRubro);
         }
+
+        if (filtroCiudad !== null) {
+            restaurantesFiltrados = restaurantesFiltrados.filter(restaurant => restaurant.ubicacion == filtroCiudad);
+        }
+
+        if (filtroHorario !== null) {
+            restaurantesFiltrados = restaurantesFiltrados.filter(function (res) {
+                return res.horarios.some(horario => horario == filtroHorario);
+            });
+        }
+
+        return restaurantesFiltrados;
+
     }
-    return "No se ha encontrado ningún restaurant";
 }
-
-//Obtiene todas las ciudades de los restaurantes sin repetidos
-Listado.prototype.obtC = function() {
-    //Array donde se van a ir agregando las ciudades (van a estar repetidas)
-    var c = [];
-    //Se recorre el array de restaurantes y se va agregando al array creado, todas las ubicaciones o ciudades encontradas
-    for (var i = 0; i < this.restaurantes.length; i++) {
-        c.push(this.restaurantes[i].ubicacion);
-    }
-    //Se crea un nuevo array donde se van a agregar las ciudades pero sin repetirse
-    var c2 = c.filter(function(elem, index, self) {
-        return index === self.indexOf(elem);
-    });
-
-    return c2.sort();
-}
-
-//Obtiene todos los rubros de los restaurantes sin repetidos. Su funcionamiento es similar a obtC()
-Listado.prototype.obtR = function() {
-    var r = [];
-    for (var i = 0; i < this.restaurantes.length; i++) {
-        r.push(this.restaurantes[i].rubro);
-    }
-
-    var r2 = r.filter(function(elem, index, self) {
-        return index === self.indexOf(elem);
-    });
-
-    return r2.sort();
-}
-
-//Obtiene todos los horarios de los restaurantes (sin repetidos). Está funcionalidad es un poco más compleja ya que un restaurante
-//tiene un array de horarios. Al buscarlos todos vamos a pasar a tener un array de arrays que luego vamos a tener que 
-//convertir en uno solo
-Listado.prototype.obtH = function() {
-    //En este array se van a cargar los arrays de horarios, que luego vamos convertir en un solo array
-    var arregloH = [];
-    //Recorremos el array de restaurantes y vamos agregando todos los array de horarios
-    for (var i = 0; i < this.restaurantes.length; i++) {
-        arregloH.push(this.restaurantes[i].horarios);
-    }
-
-    //En este arreglo vamos a poner todos los horarios, uno por uno
-    var h = [];
-    arregloH.forEach(function(a) {
-        a.forEach(function(hor) {
-            h.push(hor)
-        });
-    });
-
-    //En este arreglo vamos a poner todos los horarios pero sin repetidos
-    var h2 = h.filter(function(elem, index, self) {
-        return index === self.indexOf(elem);
-    });
-
-    return h2.sort();
-}
-
-//Función que recibe los filtros que llegan desde el HTML y filtra el arreglo de restaurantes.
-//Solo se filtra si el valor recibido es distinto de null.
-Listado.prototype.obtenerRestaurantes = function(filtroRubro, filtroCiudad, filtroHorario) {
-    var restaurantesFiltrados = this.restaurantes;
-    if (filtroRubro !== null) {
-        restaurantesFiltrados = restaurantesFiltrados.filter(restaurant => restaurant.rubro == filtroRubro);
-    }
-
-    if (filtroCiudad !== null) {
-        restaurantesFiltrados = restaurantesFiltrados.filter(restaurant => restaurant.ubicacion == filtroCiudad);
-    }
-
-    if (filtroHorario !== null) {
-        restaurantesFiltrados = restaurantesFiltrados.filter(function(res) {
-            return res.horarios.some(horario => horario == filtroHorario);
-        });
-    }
-    console.log(restaurantesFiltrados);
-    return restaurantesFiltrados;
-    
-}
-
 //Se crea el listado de restaurantes de la aplicación. Si queres agregar un restaurante nuevo, podes agregarlo desde aca, siempre
 //verificando que no se repita el id que agregues.
 
-var listadoDeRestaurantes = [
+let listadoDeRestaurantes = [
     new Restaurant(1, "TAO Uptown", "Asiática", "Nueva York", ["13:00", "15:30", "18:00"], "../img/asiatica1.jpg", [6, 7, 9, 10, 5]),
     new Restaurant(2, "Mandarín Kitchen", "Asiática", "Londres", ["15:00", "14:30", "12:30"], "../img/asiatica2.jpg", [7, 7, 3, 9, 7]),
     new Restaurant(3, "Burgermeister", "Hamburguesa", "Berlín", ["11:30", "12:00", "22:30"], "../img/hamburguesa4.jpg", [5, 8, 4, 9, 9]),
@@ -121,7 +112,7 @@ var listadoDeRestaurantes = [
     new Restaurant(10, "New London Cafe", "Desayuno", "Londres", ["12:00", "13:00", "14:30"], "../img/desayuno3.jpg", [9, 4, 6, 5, 6]),
     new Restaurant(11, "Frogburguer", "Hamburguesa", "París", ["12:00", "15:00", "17:30"], "../img/hamburguesa1.jpg", [9, 8, 5, 2, 9]),
     new Restaurant(12, "Just Salad", "Ensalada", "Nueva York", ["12:00", "15:00", "17:30"], "../img/ensalada3.jpg", [8, 1, 4, 5, 5, 7]),
-    new Restaurant(13, "The Counter", "Hamburguesa", "Nueva York", ["17:00", "18:00", "19:30"], "../img/hamburguesa2.jpg", [6, 9, 7, 6, 7, ]),
+    new Restaurant(13, "The Counter", "Hamburguesa", "Nueva York", ["17:00", "18:00", "19:30"], "../img/hamburguesa2.jpg", [6, 9, 7, 6, 7,]),
     new Restaurant(14, "TGood Seed Salads & Market", "Ensalada", "Nueva York", ["17:00", "19:00", "22:30"], "../img/ensalada4.jpg", [8, 8, 8, 8, 5, 7]),
     new Restaurant(15, "Carmine's", "Pasta", "Nueva York", ["14:30", "16:30", "19:00"], "../img/pasta1.jpg", [9, 8, 5, 5, 9]),
     new Restaurant(16, "Pastasciutta", "Pasta", "Roma", ["14:30", "15:30", "19:00"], "../img/pasta3.jpg", [4, 9, 10, 9, 4, 6]),
@@ -136,4 +127,13 @@ var listadoDeRestaurantes = [
 ];
 
 //Se crea un nuevo listado, asignandole el listado de restaurantes creado anteriormente.
-var listado = new Listado(listadoDeRestaurantes)
+let listado = new Listado(listadoDeRestaurantes)
+
+
+
+
+
+
+
+
+
