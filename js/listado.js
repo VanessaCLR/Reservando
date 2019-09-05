@@ -5,10 +5,10 @@ class Listado {
     }
 
     eliminarRepetidos(arreglo) {
-        let h2 = arreglo.filter(function (elem, index, self) {
+        let nuevoArreglo = arreglo.filter(function (elem, index, self) {
             return index === self.indexOf(elem);
         });
-        return h2.sort();
+        return nuevoArreglo.sort();
     }
 
     reservarUnHorario(id, horario) {
